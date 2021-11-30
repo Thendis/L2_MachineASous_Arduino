@@ -1,0 +1,56 @@
+LOOP  
+Serial.print(resetCond[0]);
+  Serial.print(resetCond[1]);
+  Serial.print(resetCond[2]);
+  Serial.print(resetCond[3]);
+  Serial.print(resetCond[4]);
+  Serial.print(resetCond[5]);
+  Serial.print(resetCond[6]);
+  Serial.print(resetCond[7]);
+  Serial.print(resetCond[8]);
+  Serial.print(resetCond[9]);
+  Serial.println(resetCond[10]);
+  Serial.println("-----------");
+  Serial.print(bouts[0]);
+  Serial.print(bouts[1]);
+  Serial.println(bouts[2]);
+
+variable globale:
+boolean resetCond[] = {false, false, false, false, false, false, false, false, false, false, false}; //Initialisé à 11 false -> si les 11 sont à true, on reset (=~3s)
+int compteur = 0;
+
+
+
+void saveResetState()
+{
+  //On vérifie que chaque boutons sons pressé, et que les 3 animations des chiffres sont bien arrêté
+   resetCond[compteur] = bouts[0] && bouts[1] && bouts[2] && digitalRead(5) && digitalRead(6) && digitalRead(7);
+  
+  if(compteur < 11){
+    compteur++;
+  }else compteur = 0;
+}
+
+boolean checkReset()
+{
+  for(int i = 0; i < sizeof(resetCond); i++)
+  {
+    if(resetCond[i] == false) return false;
+  }
+  return true;
+}
+
+void resetJeu(boolean e)
+{
+  if(e)
+  {
+    Serial.println("RESET");
+    for(int i = 0; i < sizeof(bouts); i++)
+    {
+      bouts[i] = false;
+      digitalWrite((i+2), LOW);
+    }
+  }
+}
+
+
