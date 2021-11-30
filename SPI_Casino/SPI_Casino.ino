@@ -5,7 +5,7 @@ char affichage[] = {' ', ' ',' ', ' ', ' ', ' ', ' ', ' ',' ', ' ',' ', ' ', ' '
 String resultat = "Partie Perdu! :(";   //Phrase pour l'affichage à la fin de la partie;
 boolean bouts[] = {false, false, false};  //Tableau contenant pour chaque boutons, s'il a été appuyé pendant la manche
 //RESET VARIABLES//
-//Permet de reset la partie si on appuie sur les 3 boutons pendant 3s
+//Permet de stoquer l'état des trois boutons appuyé (ou non) en même temps dans le temps (cf chechReset())
 boolean resetStates[] = {false, false, false, false, false, false, false, false, false, false, false}; //Initialisé à 11 false -> si les 11 sont à true, on reset (=~3s)
 int compteur = 0;               //Compteur de de boucle de temps
 
