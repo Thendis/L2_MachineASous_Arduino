@@ -1,11 +1,17 @@
 #include <LiquidCrystal.h> // permet d'utiliser le lcd plus facilement
 LiquidCrystal lcd(8 ,9 ,10 ,11 ,12 ,13); // pin que l'on va utiliser
-//initialisation a espace sur 1 char pour le bon fonctionnement de liquid cristal
+//initialisation d'un tableau char à 'espace' sur 1 char pour le bon fonctionnement de liquid cristal
 char affichage[] = {' ', ' ',' ', ' ', ' ', ' ', ' ', ' ',' ', ' ',' ', ' ', ' ', ' ',' ', ' '}; //lcd 16X2
 boolean bouts[] = {false, false, false};
+//RESET VARIABLES//
+boolean resetStates[] = {false, false, false, false, false, false, false, false, false, false, false}; //Initialisé à 11 false -> si les 11 sont à true, on reset (=~3s)
+int compteur;
+
+int lastPotent = 0;
 
 void setup()
 {
+  compteur = 0;
   Serial.begin(9600); //initialise le moniteur
   lcd.begin(16,2); // initialise le lcd
   //Pins LED
@@ -16,24 +22,20 @@ void setup()
   pinMode(5, INPUT);
   pinMode(6, INPUT);
   pinMode(7, INPUT);
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);
-  digitalWrite(7, LOW);
-  //Start
-  pinMode(2, INPUT);
+  //Potentiometre
+  pinMode(A0, INPUT);
 }
 
 void loop() {
   actualise(); //Random le contenue de affiche
-  
-  Serial.println(toS()+digitalRead(5)+digitalRead(6)+digitalRead(7)); //Convertie affiche en String pour l'affichage
-  Serial.print(bouts[0]);
-  Serial.print(bouts[1]);
-  Serial.println(bouts[2]);
+  Serial.println(triggerLaunch());
+  Serial.println(toS()); //Convertie affiche en String pour l'affichage
   lcd.clear();
   lcd.write(affichage); // affiche les  3 valeur
-  checkBouts();
-  checkLed();
+  checkBouts();       //Actualise le tableau des boutons
+  checkLed();         //Actualise les led en fonction du tableua de bouton
+  saveResetState();   //sauvegarde dans le tableau des etats de reset la dernière valeur
+  resetLance(checkReset());
   delay(275);
 }
 
@@ -82,3 +84,53 @@ String toS() // convertit le tableau en String
   }
   return s;
 }
+boolean triggerLaunch()
+{
+  int tmp = analogRead(A0)+1; //+1 por eviter les problèmes de division
+  int diff = abs(lastPotent-tmp);
+  if(diff > 0.1*1024) //1024 car on avait fait plus 1 avant
+  {
+    lastPotent = tmp;
+    return true;
+  }
+  lastPotent = tmp;
+  return false;
+  
+}
+//-----------------RESET ZONE----------//
+void saveResetState()
+{
+  //On vérifie que chaque boutons sons pressé, et que les 3 animations des chiffres sont bien arrêté
+  resetStates[compteur%11] = bouts[0] && bouts[1] && bouts[2] && digitalRead(5); //Modifier pour tinkercad
+  compteur++;
+}
+
+//Regarde dans le tableau resetStates si toutes les valeurs sont true, alors on relance la machine qui défile les chiffres
+boolean checkReset()
+{
+  for(int i = 0; i < sizeof(resetStates); i++)
+  {
+    if(resetStates[i] == false) return false;
+  }
+  return true;
+}
+
+void resetLance(boolean e)
+{
+  if(e)
+  {
+    Serial.println("RESET");
+    for(int i = 0; i < sizeof(bouts); i++)
+    {
+      bouts[i] = false;
+      digitalWrite((i+2), LOW);
+    }
+    lcd.clear();
+    lcd.setCursor(2,0);
+    lcd.print("Relancer");
+    lcd.setCursor(0,1);
+    lcd.print("Lachez boutons");
+    delay(1500);
+  }
+}
+//--------FIN RESET -----------//
