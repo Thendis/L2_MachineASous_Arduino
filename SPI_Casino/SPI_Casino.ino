@@ -16,11 +16,6 @@ void setup()
   pinMode(5, INPUT);
   pinMode(6, INPUT);
   pinMode(7, INPUT);
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);
-  digitalWrite(7, LOW);
-  //Start
-  pinMode(2, INPUT);
 }
 
 void loop() {
